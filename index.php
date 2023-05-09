@@ -3,118 +3,8 @@
 
 <head>
 	<title>Загрузка файлов</title>
-	<style>
-		body {
-			font-family: Arial, sans-serif;
-			margin: 0;
-			padding: 0;
-			background-color: #f5f5f5;
-		}
-
-		h1 {
-			font-size: 36px;
-			font-weight: bold;
-			color: #333;
-			margin-top: 30px;
-			margin-bottom: 20px;
-			text-align: center;
-		}
-
-		h2 {
-			font-size: 24px;
-			font-weight: bold;
-			color: #333;
-			margin-top: 30px;
-			margin-bottom: 20px;
-			text-align: center;
-		}
-
-		form {
-			margin: 0 auto;
-			width: 500px;
-			background-color: #fff;
-			border: 1px solid #ccc;
-			padding: 20px;
-			box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-		}
-
-		label {
-			display: block;
-			font-size: 18px;
-			font-weight: bold;
-			color: #333;
-			margin-bottom: 10px;
-		}
-
-		input[type="file"] {
-			font-size: 16px;
-			padding: 10px;
-			border: 1px solid #ccc;
-			border-radius: 5px;
-			background-color: #fff;
-			box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-		}
-
-		input[type="submit"] {
-			font-size: 18px;
-			padding: 10px 20px;
-			border: none;
-			border-radius: 5px;
-			background-color: #4CAF50;
-			color: #fff;
-			cursor: pointer;
-			transition: background-color 0.3s ease;
-		}
-
-		input[type="submit"]:hover {
-			background-color: #3e8e41;
-		}
-
-		ul {
-			list-style: none;
-			margin: 0;
-			padding: 0;
-			text-align: center;
-		}
-
-		li {
-			font-size: 18px;
-			margin-bottom: 10px;
-		}
-
-		a {
-			color: #333;
-			transition: color 0.3s ease;
-		}
-
-		a:hover {
-			color: #4CAF50;
-		}
-
-		.sort {
-			width: 100%;
-			text-align: center;
-			display: inline-block;
-			margin-bottom: 2em;
-		}
-
-		.sort label {
-			display: inline;
-			font-size: 18px;
-			font-weight: bold;
-			color: #333;
-			margin-right: 10px;
-		}
-
-		.sort select {
-			font-size: 16px;
-			padding: 10px;
-			border: 1px solid #ccc;
-			border-radius: 5px;
-			background-color: #fff;
-			box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-		}
-	</style>
+	<link rel="stylesheet" href="styles/main.css">
+	<link rel="stylesheet" href="styles/filecard.css">
 </head>
 
 <body>
@@ -129,47 +19,84 @@
 			<option value="name-desc">Имени (по убыванию)</option>
 			<option value="date-asc">Дате (по возрастанию)</option>
 			<option value="date-desc">Дате (по убыванию)</option>
+			<option value="ext-asc">Типу (по возрастанию)</option>
+			<option value="ext-desc">Типу (по убыванию)</option>
 		</select>
 	</div>
-	<ul id="file-list">
-		<?php
+	<div id="file-list"></div>
 
-		// Если папки не существует
-		if (!file_exists("uploads")) {
-			exit;
+	<!-- scripts section -->
+	<script src="js/extensions.js"></script>
+	<script>
+		async function getFiles() {
+			const files = await fetch('getFiles.php')
+				.then(response => response.json())
+			const listEl = document.getElementById('file-list')
+
+			files.forEach(file => {
+				const containerEl = document.createElement('div')
+				containerEl.classList.add('filecard-container')
+
+				const nameEl = document.createElement('div')
+				nameEl.classList.add('filecard-name')
+				nameEl.innerHTML = file.name
+
+				const typeEl = document.createElement('div')
+				typeEl.classList.add('filecard-type')
+				typeEl.innerHTML = FILE_EXTENSIONS[file.extension]
+
+				const thumbnailContainerEl = document.createElement('div')
+				thumbnailContainerEl.classList.add('filecard-thumbnail')
+
+				const thumbnailEl = document.createElement('img')
+				thumbnailEl.src = 'uploads/thumbnails' + file.path
+				thumbnailEl.addEventListener('error', e => {
+					const path = "assets/fallbackFileThumbnail.png"
+					if (e.target.src !== path) {
+						e.target.src = path
+					}
+				})
+
+				thumbnailContainerEl.append(thumbnailEl)
+				containerEl.append(thumbnailContainerEl, nameEl, typeEl)
+
+				containerEl.setAttribute('data-date', file.date)
+				containerEl.setAttribute('data-path', file.path)
+				containerEl.setAttribute('data-ext', file.extension)
+
+				listEl.append(containerEl)
+			})
 		}
 
-		// Получаем список файлов в директории uploads 
-		$files = scandir("uploads");
-		// Удаляем первые два элемента массива, которые соответствуют текущей и родительской директориям
-		unset($files[0]);
-		unset($files[1]);
-
-		// Выводим список файлов
-		foreach ($files as $file) {
-			echo '<li><a href="uploads/' . $file . '">' . $file . '</a></li>';
-		}
-		?>
-	</ul>
-	<script> function sortFiles() {
-			const fileList = document.getElementById("file-list"); const sortBy = document.getElementById("sort-by").value;
+		function sortFiles() {
+			const fileList = document.getElementById("file-list");
+			const sortBy = document.getElementById("sort-by").value;
 			const files = Array.from(fileList.children);
-			files.sort((a, b) => {
-				const aName = a.firstChild.textContent;
-				const bName = b.firstChild.textContent;
-				const aDate = new Date(a.lastChild.textContent);
-				const bDate = new Date(b.lastChild.textContent);
 
-				if (sortBy === "name-asc") {
-					return aName.localeCompare(bName);
-				} else if (sortBy === "name-desc") {
-					return bName.localeCompare(aName);
-				} else if (sortBy === "date-asc") {
-					return aDate.getTime() - bDate.getTime();
-				} else if (sortBy === "date-desc") {
-					return bDate.getTime() - aDate.getTime();
+			files.sort((a, b) => {
+				switch (sortBy) {
+					case 'name-asc':
+						return a.textContent.localeCompare(b.textContent);
+
+					case 'name-desc':
+						return b.textContent.localeCompare(a.textContent);
+
+					case 'date-asc':
+						return Number(a.getAttribute('data-date')) - Number(b.getAttribute('data-date'));
+
+					case 'date-desc':
+						return Number(b.getAttribute('data-date')) - Number(a.getAttribute('data-date'));
+
+					case 'ext-asc':
+						return a.getAttribute('data-ext').localeCompare(b.getAttribute('data-ext'));
+
+					case 'ext-desc':
+						return b.getAttribute('data-ext').localeCompare(a.getAttribute('data-ext'));
+
+					default:
+						break
 				}
-			});
+			})
 
 			while (fileList.firstChild) {
 				fileList.removeChild(fileList.firstChild);
@@ -179,6 +106,11 @@
 				fileList.appendChild(file);
 			});
 		}
+
+		(() => {
+			getFiles()
+				.then(sortFiles)
+		})()
 	</script>
 </body>
 
