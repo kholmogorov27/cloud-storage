@@ -146,5 +146,6 @@ window.FILE_EXTENSIONS = {
   "xlr": "Works Spreadsheet",
   "xls": "Microsoft Excel Spreadsheet",
   "xlsx": "Excel Open XML Spreadsheet",
-  "xml": "Extensible Markup"
+  "xml": "Extensible Markup",
+  "": "Binary"
 }

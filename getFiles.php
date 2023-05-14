@@ -23,4 +23,5 @@ if (file_exists(UPLOADS_FOLDER)) {
 }
 
 print json_encode($data);
+
 ?>
