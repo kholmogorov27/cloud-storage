@@ -29,7 +29,7 @@ switch ($_FILES["file"]["error"]) {
     createThumbnail("uploads/$name", "uploads/thumbnails/$name", 200);
 
     // Перенаправляем пользователя на главную страницу
-    //header("Location: index.php");
+    header("Location: index.php");
     exit;
 
   case 4:
