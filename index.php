@@ -15,7 +15,7 @@
 	<h2>Список загруженных файлов</h2>
 	<div class="sort">
 		<label for="sort-by">Сортировать по:</label>
-		<select id="sort-by" onchange="sortFiles()">
+		<select id="sort-by" onchange="sortFiles()" valu>
 			<option value="name-asc">Имени (по возрастанию)</option>
 			<option value="name-desc">Имени (по убыванию)</option>
 			<option value="date-asc">Дате (по возрастанию)</option>
@@ -126,6 +126,8 @@
 			const sortBy = document.getElementById("sort-by").value;
 			const files = Array.from(fileList.children);
 
+			sessionStorage.setItem('sort', sortBy)
+
 			files.sort((a, b) => {
 				switch (sortBy) {
 					case 'name-asc':
@@ -163,6 +165,11 @@
 		(() => {
 			getFiles()
 				.then(sortFiles)
+
+			const sortFromStorage = sessionStorage.getItem('sort')
+			if (sortFromStorage) {
+				const sortBy = document.getElementById("sort-by").value = sortFromStorage
+			}
 		})()
 	</script>
 </body>
