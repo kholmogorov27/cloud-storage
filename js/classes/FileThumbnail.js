@@ -6,7 +6,7 @@ window.FileThumbnail = class FileThumbnail {
 
     // thumbnail
     const thumbnailEl = document.createElement('img')
-    thumbnailEl.src = 'uploads/thumbnails' + file.path
+    thumbnailEl.src = 'uploads/thumbnails' + src
     thumbnailEl.addEventListener('error', e => {
       const path = fallbackSrc
       if (e.target.src !== path) {

@@ -40,7 +40,7 @@
 			files.forEach(file => {
 				const fileCard = new FileCard(file)
 
-				const {date, extension, path} = file
+				const { date, extension, path } = file
 				fileCard.setAttribute('data-date', date)
 				fileCard.setAttribute('data-path', path)
 				fileCard.setAttribute('data-ext', extension)
