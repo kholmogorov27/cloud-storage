@@ -1,44 +1,5 @@
 window.FileCard = class FileCard {
-  constructor({ path, extension, name }) {
-    // container
-    const containerEl = document.createElement('a')
-    containerEl.classList.add('filecard-container')
-    containerEl.href = 'uploads' + path
-
-    // name
-    const nameEl = document.createElement('div')
-    nameEl.classList.add('filecard-name')
-    nameEl.innerHTML = name
-
-    // type
-    const typeEl = document.createElement('div')
-    typeEl.classList.add('filecard-type')
-    typeEl.innerHTML = 
-      FILE_EXTENSIONS[extension] || `Неизвестное расширение (${extension})`
-    
-    // thumbnail
-    const thumbnailEl = new FileThumbnail(path)
-
-    // --- buttons ---
-    // edit button
-    const editButtonEl = new CardButton('✎', ['edit-btn'], makeOnEdit(path, extension, name))
-    // remove button
-    const removeButtonEl = new CardButton('🞬', ['remove-btn'], makeOnRemove(path))
-    // ---
-
-    // build the card
-    containerEl.append(
-      thumbnailEl, 
-      nameEl, 
-      typeEl, 
-      editButtonEl, 
-      removeButtonEl
-    )
-
-    this = containerEl
-  }
-
-  makeOnEdit(path, extension, name) {
+  static makeOnEdit(path, extension, name) {
     return event => {
       // prevent default button behavior
       event.preventDefault()
@@ -75,8 +36,7 @@ window.FileCard = class FileCard {
       modal.open()
     }
   }
-
-  makeOnRemove(path) {
+  static makeOnRemove(path) {
     return event => {
       // prevent default button behavior
       event.preventDefault()
@@ -90,5 +50,44 @@ window.FileCard = class FileCard {
         body: JSON.stringify({ path: path }),
       })
     }
+  }
+
+  constructor({ path, extension, name }) {
+    // container
+    const containerEl = document.createElement('a')
+    containerEl.classList.add('filecard-container')
+    containerEl.href = 'uploads' + path
+
+    // name
+    const nameEl = document.createElement('div')
+    nameEl.classList.add('filecard-name')
+    nameEl.innerHTML = name
+
+    // type
+    const typeEl = document.createElement('div')
+    typeEl.classList.add('filecard-type')
+    typeEl.innerHTML = 
+      FILE_EXTENSIONS[extension] || `Неизвестное расширение (${extension})`
+    
+    // thumbnail
+    const thumbnailEl = new FileThumbnail(path)
+
+    // --- buttons ---
+    // edit button
+    const editButtonEl = new CardButton('✎', ['edit-btn'], FileCard.makeOnEdit(path, extension, name))
+    // remove button
+    const removeButtonEl = new CardButton('🞬', ['remove-btn'], FileCard.makeOnRemove(path))
+    // ---
+
+    // build the card
+    containerEl.append(
+      thumbnailEl, 
+      nameEl, 
+      typeEl, 
+      editButtonEl, 
+      removeButtonEl
+    )
+
+    this = containerEl
   }
 }
