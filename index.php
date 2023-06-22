@@ -31,93 +31,21 @@
 	<script src="js/fetchWithReload.js"></script>
 	<script src="js/tingle.js"></script>
 	<script>
+
 		async function getFiles() {
-			const files = await fetch('getFiles.php')
-				.then(response => response.json())
+			const files = await fetch('getFiles.php').then(response => response.json())
+		
 			const listEl = document.getElementById('file-list')
 
 			files.forEach(file => {
-				const containerEl = document.createElement('a')
-				containerEl.href = 'uploads' + file.path
-				containerEl.classList.add('filecard-container')
+				const fileCard = new FileCard(file)
 
-				const nameEl = document.createElement('div')
-				nameEl.classList.add('filecard-name')
-				nameEl.innerHTML = file.name
+				const {date, extension, path} = file
+				fileCard.setAttribute('data-date', date)
+				fileCard.setAttribute('data-path', path)
+				fileCard.setAttribute('data-ext', extension)
 
-				const typeEl = document.createElement('div')
-				typeEl.classList.add('filecard-type')
-				typeEl.innerHTML = FILE_EXTENSIONS[file.extension] || `Неизвестное расширение (${file.extension})`
-
-				const thumbnailContainerEl = document.createElement('div')
-				thumbnailContainerEl.classList.add('filecard-thumbnail')
-				const thumbnailEl = document.createElement('img')
-				thumbnailEl.src = 'uploads/thumbnails' + file.path
-				thumbnailEl.addEventListener('error', e => {
-					const path = "assets/fallbackFileThumbnail.png"
-					if (e.target.src !== path) {
-						e.target.src = path
-					}
-				})
-
-				const editButtonEl = document.createElement('button')
-				editButtonEl.classList.add('edit-btn')
-				editButtonEl.innerHTML = '✎'
-				editButtonEl.addEventListener('click', e => {
-					e.preventDefault()
-
-					let modal = new tingle.modal({
-						footer: true
-					})
-
-					modal.addFooterBtn('Отмена', 'tingle-btn tingle-btn--danger', function () {
-						modal.close()
-					})
-
-					modal.addFooterBtn('Изменить', 'tingle-btn tingle-btn--primary', function () {
-						const newName = modal.getContent().getElementsByClassName('name-input')[0].value
-						fetchWithReload('changeFileName.php', {
-							method: 'POST',
-							headers: {
-								'Accept': 'application/json, text/plain, */*',
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({ path: file.path, name: newName, extension: file.extension }),
-						})
-						modal.close()
-					})
-
-					modal.setContent(`
-						<h1>Новое имя</h1>
-						<input type="text" class="name-input" placeholder="Имя файла" value="${file.name}" />
-					`)
-					modal.open()
-
-				})
-
-				const removeButtonEl = document.createElement('button')
-				removeButtonEl.classList.add('remove-btn')
-				removeButtonEl.innerHTML = '🞬'
-				removeButtonEl.addEventListener('click', e => {
-					e.preventDefault()
-					fetchWithReload('removeFile.php', {
-						method: 'POST',
-						headers: {
-							'Accept': 'application/json, text/plain, */*',
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({ path: file.path }),
-					})
-				})
-
-				thumbnailContainerEl.append(thumbnailEl)
-				containerEl.append(thumbnailContainerEl, nameEl, typeEl, editButtonEl, removeButtonEl)
-
-				containerEl.setAttribute('data-date', file.date)
-				containerEl.setAttribute('data-path', file.path)
-				containerEl.setAttribute('data-ext', file.extension)
-
-				listEl.append(containerEl)
+				listEl.append(fileCard)
 			})
 		}
 
